@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.451.19169",
-      "templateHash": "43630743403260377"
+      "version": "0.4.613.9944",
+      "templateHash": "3482471530005094178"
     }
   },
   "parameters": {
@@ -59,7 +59,8 @@
   },
   "functions": [],
   "variables": {
-    "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]"
+    "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
+    "nicName": "[format('{0}-nic01', parameters('vmName'))]"
   },
   "resources": [
     {
@@ -71,6 +72,12 @@
         "name": "Standard_LRS"
       },
       "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('nicName')]",
+      "location": "[parameters('location')]"
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
