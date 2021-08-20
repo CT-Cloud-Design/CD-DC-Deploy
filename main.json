@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.451.19169",
-      "templateHash": "3366793949825410745"
+      "templateHash": "43630743403260377"
     }
   },
   "parameters": {
@@ -59,8 +59,7 @@
   },
   "functions": [],
   "variables": {
-    "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
-    "nicName": "[format('{0}-nic01', parameters('vmName'))]"
+    "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -72,22 +71,6 @@
         "name": "Standard_LRS"
       },
       "kind": "Storage"
-    },
-    {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2021-02-01",
-      "name": "[variables('nicName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "[format('{0}-ipconfig1', parameters('vmName'))]",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic"
-            }
-          }
-        ]
-      }
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -118,16 +101,9 @@
           },
           "dataDisks": [
             {
-              "diskSizeGB": 1023,
+              "diskSizeGB": 32,
               "lun": 0,
               "createOption": "Empty"
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
             }
           ]
         },
@@ -139,7 +115,6 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ]
     }
