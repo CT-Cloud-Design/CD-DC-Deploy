@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.613.9944",
-      "templateHash": "3482471530005094178"
+      "templateHash": "12518768509978375603"
     }
   },
   "parameters": {
@@ -32,13 +32,45 @@
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
       }
     },
-    "vmSize": {
+    "virtualNetworkNewOrExisting": {
+      "type": "string",
+      "metadata": {
+        "description": "Boolean indicating whether the VNet is new or existing"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "New or Existing VNet Name"
+      }
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "VNet address prefix"
+      }
+    },
+    "virtualNetworkResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group of the VNet"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "New or Existing subnet Name"
+      }
+    },
+    "subnetAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet address prefix"
+      }
+    },
+    "virtualMachineSize": {
       "type": "string",
       "defaultValue": "Standard_B2s",
-      "allowedValues": [
-        "Standard_B2s",
-        "Standard_B2ms"
-      ],
       "metadata": {
         "description": "Size of the virtual machine."
       }
@@ -55,12 +87,24 @@
       "metadata": {
         "description": "Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!"
       }
+    },
+    "subnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!"
+      }
     }
   },
   "functions": [],
   "variables": {
     "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
-    "nicName": "[format('{0}-nic01', parameters('vmName'))]"
+    "vmName": "[parameters('vmName')]",
+    "nicName": "[format('{0}-nic01', parameters('vmName'))]",
+    "vnetId": {
+      "new": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+      "existing": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
+    },
+    "subnetId": "[concat(variables('vnetId')[parameters('virtualNetworkNewOrExisting')],'/subnets/',parameters('subnetName'))]"
   },
   "resources": [
     {
@@ -77,7 +121,20 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2021-02-01",
       "name": "[variables('nicName')]",
-      "location": "[parameters('location')]"
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[format('{0}-ipconfig1', parameters('vmName'))]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ]
+      }
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -86,7 +143,7 @@
       "location": "[parameters('location')]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[parameters('virtualMachineSize')]"
         },
         "osProfile": {
           "computerName": "[parameters('vmName')]",
@@ -114,6 +171,13 @@
             }
           ]
         },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
@@ -122,6 +186,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ]
     }
