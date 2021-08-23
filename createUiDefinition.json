@@ -27,6 +27,15 @@
                   }
                 },
                 {
+                  "name": "adminUsername",
+                  "type": "Microsoft.Common.TextBox",
+                  "label": "Admin Username",
+                  "toolTip": "Name of your admin for this virtual machine",
+                  "constraints": {
+                    "required": true
+                  }
+                },
+                {
                   "name": "vmPassword",
                   "type": "Microsoft.Compute.CredentialsCombo",
                   "label": {
@@ -108,6 +117,7 @@
       "outputs": {
         "location": "[location()]",
         "vmName": "[steps('deploymentDetails').virtualMachine.vmName]",
+        "adminUsername": "[steps('deploymentDetails').virtualMachine.adminUsername]",
         "adminPassword": "[steps('deploymentDetails').virtualMachine.vmPassword.password]",
         "virtualNetworkName": "[steps('deploymentDetails').vnet.name]",
         "virtualNetworkNewOrExisting": "[steps('deploymentDetails').vnet.newOrExisting]",
