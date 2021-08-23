@@ -149,8 +149,11 @@
               }
             }
           }
-        ]
-      }
+        ],
+        "enableIPForwarding": false
+      },
+      "dependsOn": [
+      ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
