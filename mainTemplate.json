@@ -87,12 +87,6 @@
       "metadata": {
         "description": "Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!"
       }
-    },
-    "subnetId": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!"
-      }
     }
   },
   "functions": [],

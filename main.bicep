@@ -36,11 +36,8 @@ param virtualMachineSize string = 'Standard_B2s'
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!')
+@description('Name of the virtual machine.')
 param vmName string
-
-@description('Name of the virtual machine. cd-server-nicht-exchange.nennen!wegenISDoof!111elf!!')
-param subnetId string
 
 var storageAccountName_var = 'bootdiags${uniqueString(resourceGroup().id)}'
 var vmName_var = vmName
