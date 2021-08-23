@@ -32,27 +32,10 @@
           "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
         }
       },
-      "virtualNetworkNewOrExisting": {
-        "type": "string",
-        "defaultValue": "existing",
-        "allowedValues": [
-          "new",
-          "existing"
-        ],
-        "metadata": {
-          "description": "Boolean indicating whether the VNet is new or existing"
-        }
-      },
       "virtualNetworkName": {
         "type": "string",
         "metadata": {
           "description": "New or Existing VNet Name"
-        }
-      },
-      "virtualNetworkAddressPrefix": {
-        "type": "string",
-        "metadata": {
-          "description": "VNet address prefix"
         }
       },
       "virtualNetworkResourceGroup": {
