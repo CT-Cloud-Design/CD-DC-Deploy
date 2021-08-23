@@ -73,24 +73,56 @@
         "metadata": {
           "description": "Name of the virtual machine."
         }
+      },
+      "vmName2": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the virtual machine."
+        }
+      },
+      "availabilitySetName": {
+        "defaultValue": "DC-AVS",
+        "type": "string",
+        "metadata": {
+        "description": "Availability Set Name where the VMs will be placed"
+        }
       }
     },
     "functions": [],
     "variables": {
-      "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
       "nicName": "[format('{0}-nic01', parameters('vmName'))]",
-      "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]"
+      "nicName2": "[format('{0}-nic01', parameters('vmName2'))]",
+      "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+      "availabilitySetPlatformFaultDomainCount": "2",
+      "availabilitySetPlatformUpdateDomainCount": "5",
+      "diagnosticStorageAccountName": "[concat('diagst', uniqueString(resourceGroup().id))]"
     },
     "resources": [
       {
+        "name": "[variables('diagnosticStorageAccountName')]",
         "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2021-04-01",
-        "name": "[variables('storageAccountName')]",
         "location": "[parameters('location')]",
+        "apiVersion": "2021-04-01",
         "sku": {
           "name": "Standard_LRS"
         },
-        "kind": "Storage"
+        "tags": {
+          "displayName": "diagnosticStorageAccount"
+        },
+        "kind": "StorageV2"
+      },
+      {
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[parameters('availabilitySetName')]",
+        "apiVersion": "2020-06-01",
+        "location": "[parameters('location')]",
+        "properties": {
+          "platformFaultDomainCount": "[variables('availabilitySetPlatformFaultDomainCount')]",
+          "platformUpdateDomainCount": "[variables('availabilitySetPlatformUpdateDomainCount')]"
+        },
+        "sku": {
+          "name": "Aligned"
+        }
       },
       {
         "type": "Microsoft.Network/networkInterfaces",
@@ -126,7 +158,19 @@
           "osProfile": {
             "computerName": "[parameters('vmName')]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]"
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+                "provisionVMAgent": true,
+                "enableAutomaticUpdates": true,
+                "patchSettings": {
+                    "patchMode": "AutomaticByOS",
+                    "assessmentMode": "ImageDefault",
+                    "enableHotpatching": false
+                }
+            },
+            "secrets": [],
+            "allowExtensionOperations": true,
+            "requireGuestProvisionSignal": true
           },
           "storageProfile": {
             "imageReference": {
@@ -136,16 +180,26 @@
               "version": "latest"
             },
             "osDisk": {
+              "name": "[concat(parameters('vmName'), '_OsDisk_1')]",
               "createOption": "FromImage",
+              "caching": "None",
+              "writeAcceleratorEnabled": false,
               "managedDisk": {
-                "storageAccountType": "StandardSSD_LRS"
-              }
+                "storageAccountType": "Premium_LRS"
+              },
+              "diskSizeGB": 64
             },
             "dataDisks": [
               {
-                "diskSizeGB": 32,
                 "lun": 0,
-                "createOption": "Empty"
+                "name": "[concat(parameters('vmName'), '_DataDisk1')]",
+                "createOption": "Empty",
+                "caching": "None",
+                "writeAcceleratorEnabled": false,
+                 "managedDisk": {
+                    "storageAccountType": "Premium_LRS"
+                },
+                "diskSizeGB": 32
               }
             ]
           },
@@ -156,23 +210,107 @@
               }
             ]
           },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+        },
           "diagnosticsProfile": {
             "bootDiagnostics": {
               "enabled": true,
-              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageAccountName')), '2016-01-01').primaryEndpoints.blob]"
             }
           }
         },
         "dependsOn": [
           "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageAccountName'))]",
+          "[resourceId('Microsoft.Compute/availabilitySets/', parameters('availabilitySetName'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-03-01",
+        "name": "[parameters('vmName2')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[parameters('virtualMachineSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('vmName2')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+                "provisionVMAgent": true,
+                "enableAutomaticUpdates": true,
+                "patchSettings": {
+                    "patchMode": "AutomaticByOS",
+                    "assessmentMode": "ImageDefault",
+                    "enableHotpatching": false
+                }
+            },
+            "secrets": [],
+            "allowExtensionOperations": true,
+            "requireGuestProvisionSignal": true
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "MicrosoftWindowsServer",
+              "offer": "WindowsServer",
+              "sku": "[parameters('OSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "[concat(parameters('vmName2'), '_OsDisk_1')]",
+              "createOption": "FromImage",
+              "caching": "None",
+              "writeAcceleratorEnabled": false,
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              },
+              "diskSizeGB": 64
+            },
+            "dataDisks": [
+              {
+                "lun": 0,
+                "name": "[concat(parameters('vmName2'), '_DataDisk1')]",
+                "createOption": "Empty",
+                "caching": "None",
+                "writeAcceleratorEnabled": false,
+                 "managedDisk": {
+                    "storageAccountType": "Premium_LRS"
+                },
+                "diskSizeGB": 32
+              }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              }
+            ]
+          },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+        },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": true,
+              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageAccountName')), '2016-01-01').primaryEndpoints.blob]"
+            }
+          }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageAccountName'))]",
+          "[resourceId('Microsoft.Compute/availabilitySets/', parameters('availabilitySetName'))]"
         ]
       }
     ],
     "outputs": {
       "storageName": {
         "type": "string",
-        "value": "[variables('storageAccountName')]"
+        "value": "[variables('diagnosticStorageAccountName')]"
       }
     }
   }
