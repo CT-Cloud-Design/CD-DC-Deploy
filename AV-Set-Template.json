@@ -1,0 +1,154 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "extensions_IaaSAntimalware_Paths": {
+            "type": "SecureString"
+        },
+        "extensions_IaaSAntimalware_Extensions": {
+            "type": "SecureString"
+        },
+        "extensions_IaaSAntimalware_Processes": {
+            "type": "SecureString"
+        },
+        "virtualMachine1_name": {
+            "defaultValue": "DC01-Kundenname",
+            "type": "String"
+        },
+        "virtualMachine2_name": {
+            "defaultValue": "DC02-Kundenname",
+            "type": "String"
+        },
+        "availabilitySets_DC_AVS_externalid": {
+            "defaultValue": "/subscriptions/853ead1d-7128-49e3-ae7a-274ff5bdeaf7/resourceGroups/DC-RG/providers/Microsoft.Compute/availabilitySets/DC-AVS",
+            "type": "String"
+        },
+        "disks_DC4_AT2RAD_OsDisk_1_832d22075f994d06be88052be8f4fef3_externalid": {
+            "defaultValue": "/subscriptions/853ead1d-7128-49e3-ae7a-274ff5bdeaf7/resourceGroups/DC-RG/providers/Microsoft.Compute/disks/DC4-AT2RAD_OsDisk_1_832d22075f994d06be88052be8f4fef3",
+            "type": "String"
+        },
+        "disks_DC4_AT2RAD_DataDisk01_externalid": {
+            "defaultValue": "/subscriptions/853ead1d-7128-49e3-ae7a-274ff5bdeaf7/resourceGroups/DC-RG/providers/Microsoft.Compute/disks/DC4-AT2RAD_DataDisk01",
+            "type": "String"
+        },
+        "networkInterfaces_dc4_at2rad266_externalid": {
+            "defaultValue": "/subscriptions/853ead1d-7128-49e3-ae7a-274ff5bdeaf7/resourceGroups/DC-RG/providers/Microsoft.Network/networkInterfaces/dc4-at2rad266",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('virtualMachine1_name')]",
+            "location": "westeurope",
+            "identity": {
+                "principalId": "40fc42f1-db86-4dab-9f69-e0362e3adfcb",
+                "tenantId": "7927fbc9-3aaf-4806-aec0-8b61c79b0104",
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[parameters('availabilitySets_DC_AVS_externalid')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2s"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachine1_name'), '_OsDisk_1_832d22075f994d06be88052be8f4fef3')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('disks_DC4_AT2RAD_OsDisk_1_832d22075f994d06be88052be8f4fef3_externalid')]"
+                        },
+                        "diskSizeGB": 64
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[concat(parameters('virtualMachine1_name'), '_DataDisk01')]",
+                            "createOption": "Attach",
+                            "caching": "None",
+                            "writeAcceleratorEnabled": false,
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[parameters('disks_DC4_AT2RAD_DataDisk01_externalid')]"
+                            },
+                            "diskSizeGB": 32,
+                            "toBeDetached": false
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachine1_name')]",
+                    "adminUsername": "dc4admin",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByOS",
+                            "assessmentMode": "ImageDefault",
+                            "enableHotpatching": false
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_dc4_at2rad266_externalid')]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "https://strgat2radwg01.blob.core.windows.net/"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(parameters('virtualMachine1_name'), '/IaaSAntimalware')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine1_name'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Security",
+                "type": "IaaSAntimalware",
+                "typeHandlerVersion": "1.1",
+                "settings": {
+                    "AntimalwareEnabled": "true",
+                    "Exclusions": {
+                        "Paths": "[parameters('extensions_IaaSAntimalware_Paths')]",
+                        "Extensions": "[parameters('extensions_IaaSAntimalware_Extensions')]",
+                        "Processes": "[parameters('extensions_IaaSAntimalware_Processes')]"
+                    },
+                    "RealtimeProtectionEnabled": "true",
+                    "ScheduledScanSettings": {
+                        "isEnabled": "false",
+                        "scanType": "Quick",
+                        "day": "7",
+                        "time": "120"
+                    }
+                }
+            }
+        }
+    ]
+}

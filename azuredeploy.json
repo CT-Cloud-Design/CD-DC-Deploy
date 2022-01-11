@@ -102,7 +102,10 @@
   "variables": {
     "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
     "nicName": "[format('{0}-nic01', parameters('vmName'))]",
-    "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]"
+    "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
+    "availabilitySetPlatformFaultDomainCount": "2",
+    "availabilitySetPlatformUpdateDomainCount": "5",
+    "diagnosticStorageAccountName": "[concat('diagst', uniqueString(resourceGroup().id))]",
   },
   "resources": [
     {      
