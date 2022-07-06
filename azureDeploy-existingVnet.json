@@ -92,6 +92,13 @@
         "metadata": {
         "description": "Availability Set Name where the VMs will be placed"
         }
+      },
+      "storageAccountName": {
+        "defaultValue": "stdiagprodxxazvm",
+        "type": "string",
+        "metadata": {
+        "description": "Storage Account Name for Azure VMs"
+        }
       }
     },
     "functions": [],
@@ -101,7 +108,7 @@
       "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]",
       "availabilitySetPlatformFaultDomainCount": "2",
       "availabilitySetPlatformUpdateDomainCount": "5",
-      "diagnosticStorageAccountName": "[concat('diagst', uniqueString(resourceGroup().id))]"
+      "diagnosticStorageAccountName": "[format('{0}', parameters('storageAccountName'))]"
     },
     "resources": [
       {
