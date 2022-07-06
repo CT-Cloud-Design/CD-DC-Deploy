@@ -24,10 +24,10 @@
     },
     "OSVersion": {
       "type": "string",
-      "defaultValue": "2022-Datacenter-smalldisk",
+      "defaultValue": "2019-datacenter-smalldisk-gensecond",
       "allowedValues": [
         "2019-Datacenter-smalldisk",
-        "2022-Datacenter-smalldisk"
+        "2019-datacenter-smalldisk-gensecond"
       ],
       "metadata": {
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
