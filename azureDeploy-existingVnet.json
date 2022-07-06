@@ -24,10 +24,13 @@
       },
       "OSVersion": {
         "type": "string",
-        "defaultValue": "2019-Datacenter-smalldisk",
+        "defaultValue": "2022-datacenter-smalldisk-g2",
         "allowedValues": [
-          "2019-Datacenter-smalldisk"
-        ],
+        "2022-datacenter-smalldisk-g2",
+        "2022-datacenter-smalldisk",
+        "2019-Datacenter-smalldisk",
+        "2019-datacenter-smalldisk-gensecond"
+      ],
         "metadata": {
           "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
         }
@@ -69,19 +72,21 @@
         }
       },
       "vmName": {
+        "defaultValue": "xx-azwe-dc01",
         "type": "string",
         "metadata": {
           "description": "Name of the virtual machine."
         }
       },
       "vmName2": {
+        "defaultValue": "xx-azwe-dc02",
         "type": "string",
         "metadata": {
-          "description": "Name of the virtual machine."
+          "description": "Name of the second virtual machine."
         }
       },
       "availabilitySetName": {
-        "defaultValue": "DC-AVS",
+        "defaultValue": "avail-dc-prod-xx-01",
         "type": "string",
         "metadata": {
         "description": "Availability Set Name where the VMs will be placed"
