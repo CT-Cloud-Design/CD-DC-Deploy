@@ -24,8 +24,10 @@
     },
     "OSVersion": {
       "type": "string",
-      "defaultValue": "2019-datacenter-smalldisk-gensecond",
+      "defaultValue": "2022-datacenter-smalldisk-g2",
       "allowedValues": [
+        "2022-datacenter-smalldisk-g2",
+        "2022-datacenter-smalldisk",
         "2019-Datacenter-smalldisk",
         "2019-datacenter-smalldisk-gensecond"
       ],
