@@ -6,6 +6,9 @@
 # Existing VNet
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCT-Cloud-Design%2FCD-DC-Deploy%2Fmain%2FazureDeploy-existingVnet.json)
 
+# Existing VNet ADConnect
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCT-Cloud-Design%2FCD-DC-Deploy%2Fmain%2FazureDeploy-adconnect.json)
+
 ## Aditional URLs
   https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade
   
