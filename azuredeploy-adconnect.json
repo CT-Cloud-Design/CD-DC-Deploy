@@ -73,6 +73,7 @@
       }
     },
     "vmName": {
+      "defaultValue": "xx-azwe-aadc01",
       "type": "string",
       "metadata": {
         "description": "Name of the virtual machine."
