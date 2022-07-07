@@ -36,27 +36,10 @@
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
       }
     },
-    "virtualNetworkNewOrExisting": {
-      "type": "string",
-      "defaultValue": "existing",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
-      "metadata": {
-        "description": "Boolean indicating whether the VNet is new or existing"
-      }
-    },
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
         "description": "New or Existing VNet Name"
-      }
-    },
-    "virtualNetworkAddressPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet address prefix"
       }
     },
     "virtualNetworkResourceGroup": {
@@ -69,12 +52,6 @@
       "type": "string",
       "metadata": {
         "description": "New or Existing subnet Name"
-      }
-    },
-    "subnetAddressPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "Subnet address prefix"
       }
     },
     "virtualMachineSize": {
@@ -116,28 +93,6 @@
     "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]"
   },
   "resources": [
-    {      
-      "condition": "[equals(parameters('virtualNetworkNewOrExisting'),'new')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2017-09-01",
-      "name": "[parameters('virtualNetworkName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('virtualNetworkAddressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[parameters('subnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetAddressPrefix')]"
-            }
-          }
-        ]
-      }
-    },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2021-02-01",
