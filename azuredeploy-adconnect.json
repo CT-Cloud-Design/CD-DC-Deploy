@@ -89,7 +89,6 @@
   },
   "functions": [],
   "variables": {
-    "storageAccountName":  "[format('{0}', parameters('storageAccountName'))]",
     "nicName": "[format('{0}-nic01', parameters('vmName'))]",
     "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'),  parameters('subnetName'))]"
   },
@@ -161,12 +160,12 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+            "storageUri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net')]"
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
       ]
     }
   ],
